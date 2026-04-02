@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ztpai;
+using ztpai.DTO;
 using ztpai.Models;
 
 namespace ztpai.Controllers
@@ -23,35 +24,53 @@ namespace ztpai.Controllers
 
         // GET: api/Products
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
+        public async Task<ActionResult<IEnumerable<ProductResponseDTO>>> GetProducts()
         {
-            return await _context.Products.ToListAsync();
+            var products =  await _context.Products.ToListAsync();
+
+            var productsDto = products.Select(x => new ProductResponseDTO {
+                Name = x.Name,
+                Description = x.Description,
+                Price = x.Price
+            }).ToList();
+
+            return Ok(productsDto);
         }
 
         // GET: api/Products/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Product>> GetProduct(int id)
+        public async Task<ActionResult<ProductResponseDTO>> GetProduct(int id)
         {
             var product = await _context.Products.FindAsync(id);
 
             if (product == null)
             {
-                return NotFound();
+                return NotFound(new {message = $"Not found product id = {id}" });
             }
 
-            return product;
+            var productDto = new ProductResponseDTO
+            {
+                Name = product.Name,
+                Description = product.Description,
+                Price = product.Price
+            };
+
+            return productDto;
         }
 
         // PUT: api/Products/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutProduct(int id, Product product)
+        public async Task<IActionResult> PutProduct(int id, ProductRequestDTO productDto)
         {
-            if (id != product.Id)
-            {
-                return BadRequest();
-            }
 
+            var product = new Product
+            {
+                Id = id,
+                Name = productDto.Name,
+                Description = productDto.Description,
+                Price = productDto.Price
+            };
             _context.Entry(product).State = EntityState.Modified;
 
             try
@@ -62,7 +81,7 @@ namespace ztpai.Controllers
             {
                 if (!ProductExists(id))
                 {
-                    return NotFound();
+                    return NotFound(new { message = $"Not found product id = {id}" });
                 }
                 else
                 {
@@ -76,8 +95,14 @@ namespace ztpai.Controllers
         // POST: api/Products
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Product>> PostProduct(Product product)
+        public async Task<ActionResult<Product>> PostProduct(ProductRequestDTO productDto)
         {
+            var product = new Product 
+            {
+                Name = productDto.Name,
+                Description = productDto.Description,
+                Price = productDto.Price
+            };
             _context.Products.Add(product);
             await _context.SaveChangesAsync();
 
@@ -91,7 +116,7 @@ namespace ztpai.Controllers
             var product = await _context.Products.FindAsync(id);
             if (product == null)
             {
-                return NotFound();
+                return NotFound(new { message = $"Not found product id = {id}" });
             }
 
             _context.Products.Remove(product);

@@ -1,5 +1,5 @@
-
 using Microsoft.EntityFrameworkCore;
+using ztpai.Middleware;
 
 namespace ztpai
 {
@@ -11,11 +11,30 @@ namespace ztpai
 
             // Add services to the container.
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers()
+                .ConfigureApiBehaviorOptions(options =>
+                {
+                    options.InvalidModelStateResponseFactory = context =>
+                    {
+                        var errors = context.ModelState.Values
+                            .SelectMany(v => v.Errors)
+                            .Select(e => e.ErrorMessage);
+
+                        var validationError = new
+                        {
+                            error = "Validation error",
+                            message = string.Join(", ", errors)
+                        };
+
+                        return new Microsoft.AspNetCore.Mvc.BadRequestObjectResult(validationError);
+                    };
+                });
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
 
             builder.Services.AddDbContext<MyDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+            builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
             var app = builder.Build();
 
@@ -25,10 +44,11 @@ namespace ztpai
                 app.MapOpenApi();
             }
 
+            app.UseExceptionHandler(_ => { });
+
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
-
 
             app.MapControllers();
 
