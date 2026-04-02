@@ -1,0 +1,27 @@
+@ztpai_HostAddress = https://localhost:7094
+
+GET {{ztpai_HostAddress}}/api/products
+Accept: application/json
+
+###
+
+POST {{ztpai_HostAddress}}/api/products
+Content-Type: application/json
+
+{
+  "Name": "Laptop ASUS TUF F16",
+  "Description": "Laptop do gier z średniej półki",
+  "Price": 4300.0
+}
+
+###
+
+@getId = 1
+GET {{ztpai_HostAddress}}/api/products/{{getId}}
+
+###
+
+@deleteId = 1
+DELETE {{ztpai_HostAddress}}/api/products/{{deleteId}}
+
+###
