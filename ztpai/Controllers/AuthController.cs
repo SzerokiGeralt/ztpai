@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -20,11 +21,11 @@ namespace ztpai.Controllers
         public async Task<ActionResult<User>> Register(UserDTO request)
         {
             User user;
-            try 
+            try
             {
                 user = await authService.RegisterAsync(request);
-            } 
-            catch (Exception ex) 
+            }
+            catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
@@ -44,6 +45,20 @@ namespace ztpai.Controllers
                 return BadRequest(ex.Message);
             }
             return Ok(token);
+        }
+
+        [Authorize]
+        [HttpGet("secret")]
+        public IActionResult AuthenticatedOnlyEndpoint()
+        {
+            return Ok("You are authenticated");
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("admin-only")]
+        public IActionResult AdminOnlyEndpoint()
+        {
+            return Ok("You're an admin");
         }
     }
 }

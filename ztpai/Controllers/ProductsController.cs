@@ -126,12 +126,7 @@ namespace ztpai.Controllers
             return NoContent();
         }
 
-        [Authorize]
-        [HttpGet("secret")]
-        public IActionResult AuthenticatedOnlyEndpoint()
-        {
-            return Ok("You are authenticated");
-        }
+        
 
         private bool ProductExists(int id)
         {
