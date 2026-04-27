@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Scalar.AspNetCore;
 using ztpai.Middleware;
 
 namespace ztpai
@@ -42,6 +43,7 @@ namespace ztpai
             if (app.Environment.IsDevelopment())
             {
                 app.MapOpenApi();
+                app.MapScalarApiReference();
             }
 
             app.UseExceptionHandler(_ => { });
