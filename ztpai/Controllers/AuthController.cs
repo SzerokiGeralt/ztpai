@@ -20,31 +20,30 @@ namespace ztpai.Controllers
         [HttpPost("register")]
         public async Task<ActionResult<User>> Register(UserDTO request)
         {
-            User user;
             try
             {
-                user = await authService.RegisterAsync(request);
+                var user = await authService.RegisterAsync(request);
+                return Ok(user);
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
-            return Ok(user);
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<string>> Login(UserDTO request)
+        public async Task<ActionResult<TokenResponseDTO>> Login(UserDTO request)
         {
-            string token;
             try
             {
-                token = await authService.LoginAsync(request);
+                var token = await authService.LoginAsync(request);
+                return Ok(token);
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
-            return Ok(token);
+            
         }
 
         [Authorize]
@@ -59,6 +58,14 @@ namespace ztpai.Controllers
         public IActionResult AdminOnlyEndpoint()
         {
             return Ok("You're an admin");
+        }
+
+        [HttpPost("refresh-token")]
+        public async Task<ActionResult<TokenResponseDTO>> RefreshTokens(RefreshTokenRequestDTO request)
+        {
+            var result = await authService.RefreshTokensAsync(request);
+            if (result is null || result.AccessToken is null || result.RefreshToken is null) return Unauthorized("Invalid refresh token");
+            return Ok(result);
         }
     }
 }
