@@ -7,63 +7,43 @@ using System.Security.Claims;
 using System.Text;
 using ztpai.DTO;
 using ztpai.Models;
+using ztpai.Services;
 
 namespace ztpai.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthController(IConfiguration configuration) : ControllerBase
+    public class AuthController(IAuthService authService) : ControllerBase
     {
-        public static User user = new();
 
         [HttpPost("register")]
-        public ActionResult<User> Register(UserDTO request)
+        public async Task<ActionResult<User>> Register(UserDTO request)
         {
-            var hashedPassword = new PasswordHasher<User>().HashPassword(user, request.Password);
-            user.Username = request.Username;
-            user.PasswordHash = hashedPassword;
-
-            return Ok(User);
+            User user;
+            try 
+            {
+                user = await authService.RegisterAsync(request);
+            } 
+            catch (Exception ex) 
+            {
+                return BadRequest(ex.Message);
+            }
+            return Ok(user);
         }
 
         [HttpPost("login")]
-        public ActionResult<string> Login(UserDTO request)
+        public async Task<ActionResult<string>> Login(UserDTO request)
         {
-            if (user.Username != request.Username)
+            string token;
+            try
             {
-                return BadRequest("User not found");
+                token = await authService.LoginAsync(request);
             }
-            if (new PasswordHasher<User>().VerifyHashedPassword(user, user.PasswordHash, request.Password) == PasswordVerificationResult.Failed)
+            catch (Exception ex)
             {
-                return BadRequest("Invalid password");
+                return BadRequest(ex.Message);
             }
-
-            string token = CreateToken(user);
             return Ok(token);
-        }
-
-        private string CreateToken(User user)
-        {
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name,user.Username)
-            };
-
-            var key = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(configuration.GetValue<string>("AppSettings:Token")!)
-                );
-
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512);
-
-            var tokenDescriptor = new JwtSecurityToken(
-                issuer: configuration.GetValue<string>("AppSettings:Issuer"),
-                audience: configuration.GetValue<string>("AppSettings:Audience"),
-                claims: claims,
-                expires: DateTime.UtcNow.AddDays(1),
-                signingCredentials: creds
-                );
-
-            return new JwtSecurityTokenHandler().WriteToken(tokenDescriptor);
         }
     }
 }
