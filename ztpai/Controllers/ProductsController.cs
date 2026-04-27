@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -123,6 +124,14 @@ namespace ztpai.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        // GET : api/products/secret
+        [HttpGet("secret")]
+        [Authorize(Roles = "Admin")]
+        public IActionResult Secret() 
+        {
+            return Ok("Endpoint tylko dla adminów");
         }
 
         private bool ProductExists(int id)

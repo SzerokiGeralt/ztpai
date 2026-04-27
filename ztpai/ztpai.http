@@ -26,3 +26,59 @@ DELETE {{ztpai_HostAddress}}/api/products/{{deleteId}}
 
 ###
 
+### REJESTRACJA UŻYTKOWNIKA
+POST {{ztpai_HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "Password123!"
+}
+
+###
+
+### LOGOWANIE UŻYTKOWNIKA
+# @name loginUser
+POST {{ztpai_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "Password123!"
+}
+
+###
+
+@user_token = {{login.response.body.token}}
+
+### CHRONIONY ENDPOINT
+GET {{ztpai_HostAddress}}/api/products/secret
+
+###
+
+### CHRONIONY ENDPOINT ADMIN - Z TOKENEM USERA
+GET {{ztpai_HostAddress}}/api/products/secret
+Authorization: Bearer {{user_token}}
+
+###
+
+### LOGOWANIE ADMINA
+# @name loginAdmin
+POST {{ztpai_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@example.com",
+  "password": "AdminPassword123!"
+}
+
+###
+
+@admin_token = {{loginAdmin.response.body.token}}
+
+### CHRONIONY ENDPOINT ADMIN - Z TOKENEM ADMINA
+GET {{ztpai_HostAddress}}/api/products/secret
+Authorization: Bearer {{admin_token}}
+
+###
+
