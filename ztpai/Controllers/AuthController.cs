@@ -12,18 +12,18 @@ using ztpai.Services;
 
 namespace ztpai.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/auth")]
     [ApiController]
     public class AuthController(IAuthService authService) : ControllerBase
     {
 
         [HttpPost("register")]
-        public async Task<ActionResult<User>> Register(UserDTO request)
+        public async Task<IActionResult> Register(UserDTO request)
         {
             try
             {
-                var user = await authService.RegisterAsync(request);
-                return Ok(user);
+                await authService.RegisterAsync(request);
+                return Ok("Registration successful");
             }
             catch (Exception ex)
             {
