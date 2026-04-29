@@ -18,31 +18,26 @@ namespace ztpai.Controllers
     [ApiController]
     public class ProductsController : ControllerBase
     {
-        private readonly ProductService _service;
+        private readonly IProductsService _service;
+        private readonly MyDbContext _context;
 
-        public ProductsController(ProductService service)
+        public ProductsController(IProductsService service, MyDbContext context)
         {
             _service = service;
+            _context = context;
         }
 
         // GET: api/Products
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ProductResponseDTO>>> GetProducts()
         {
-            var products =  await _context.Products.ToListAsync();
-            //TODO: Move response to repository/service
-            var productsDto = products.Select(x => new ProductResponseDTO {
-                Name = x.Name,
-                Description = x.Description,
-                Price = x.Price
-            }).ToList();
-
+            var productsDto = await _service.GetProductsAsync();
             return Ok(productsDto);
         }
 
         // GET: api/Products/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<ProductResponseDTO>> GetProduct(int id)
+        public async Task<ActionResult<ProductResponseDTO>> GetProductById(int id)
         {
             var product = await _context.Products.FindAsync(id);
 
@@ -66,7 +61,7 @@ namespace ztpai.Controllers
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [Authorize(Roles ="Admin")]
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutProduct(int id, ProductRequestDTO productDto)
+        public async Task<IActionResult> UpdateProduct(int id, ProductRequestDTO productDto)
         {
             //TODO: Move response to repository/service
             var product = new Product

@@ -3,16 +3,17 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using ztpai.Models;
+using ztpai.Repository;
 using ztpai.Services;
 
 namespace ztpai.UnitTests.ServicesTests
 {
     public class OrderServiceTests
     {
-        private readonly Mock<MyDbContext> _contextMock;
+        private readonly Mock<IProductsRepository> _repositoryMock;
         public OrderServiceTests()
         {
-            _contextMock = new Mock<MyDbContext>(MockBehavior.Strict);
+            _repositoryMock = new Mock<IProductsRepository>(MockBehavior.Strict);
         }
 
         [Fact]
@@ -26,7 +27,7 @@ namespace ztpai.UnitTests.ServicesTests
                 new Product {Price = 30.0M}
             };
             //Act
-            var service = new OrderService(_contextMock.Object);
+            var service = new OrderService(_repositoryMock.Object);
             var result = service.calculateTotal(productList);
             //Assert
             Assert.Equal(60.0M,result);

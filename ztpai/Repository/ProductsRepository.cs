@@ -1,4 +1,5 @@
-﻿using ztpai.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using ztpai.Models;
 
 namespace ztpai.Repository
 {
@@ -11,27 +12,27 @@ namespace ztpai.Repository
             _context = context;
         }
 
-        public Task AddProductAsync(Product request)
+        public async Task AddProductAsync(Product request)
         {
             throw new NotImplementedException();
         }
 
-        public Task DeleteProductAsync(int productId)
+        public async Task DeleteProductAsync(int productId)
         {
             throw new NotImplementedException();
         }
 
-        public Task<IEnumerable<Product>> GetAllProductsAsync()
+        public async Task<IEnumerable<Product>> GetAllProductsAsync()
+        {
+            return await _context.Products.ToListAsync();
+        }
+
+        public async Task<Product> GetProductByIdAsync(int productId)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Product> GetProductByIdAsync(int productId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task UpdateProductAsync(int productId, Product request)
+        public async Task UpdateProductAsync(int productId, Product request)
         {
             throw new NotImplementedException();
         }

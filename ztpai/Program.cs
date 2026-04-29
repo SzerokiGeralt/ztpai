@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using System.Text;
 using ztpai.Middleware;
+using ztpai.Repository;
 using ztpai.Services;
 
 namespace ztpai
@@ -38,6 +39,8 @@ namespace ztpai
             builder.Services.AddOpenApi();
 
             builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<IProductsRepository, ProductsRepository>();
+            builder.Services.AddScoped<IProductsService, ProductsService>();
 
             builder.Services.AddDbContext<MyDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
