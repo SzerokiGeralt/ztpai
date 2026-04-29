@@ -26,9 +26,11 @@ namespace ztpai.UnitTests.ServicesTests
                 new Product {Price = 20.0M},
                 new Product {Price = 30.0M}
             };
+
             //Act
             var service = new OrderService(_repositoryMock.Object);
             var result = service.calculateTotal(productList);
+
             //Assert
             Assert.Equal(60.0M,result);
         }
@@ -37,16 +39,29 @@ namespace ztpai.UnitTests.ServicesTests
         public void CalculateTotal_EmptyList_ReturnsZero()
         {
             //Arrange
+            List<Product> productList = null!;
+
             //Act
+            var service = new OrderService(_repositoryMock.Object);
+            var result = service.calculateTotal(productList);
+
             //Assert
+            Assert.Equal(0.0M, result);
         }
 
         [Fact]
         public void CalculateTotal_NullArgument_ThrowsException()
         {
             //Arrange
+
+
             //Act
+            var service = new OrderService(_repositoryMock.Object);
+            Action exceptionCode = () => service.calculateTotal(null!);
+
             //Assert
+            Assert.Throws<ArgumentNullException>(exceptionCode);
+
         }
     }
 }

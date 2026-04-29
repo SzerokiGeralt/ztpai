@@ -13,6 +13,7 @@ namespace ztpai.Services
         }
         public decimal calculateTotal(List<Product> products)
         {
+            if (products is null) throw new ArgumentNullException("Calculate total list null reference");
             decimal sum = 0.0M;
             sum = products.Select(x => x.Price).ToList().Sum();
             return sum;
