@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="ztpai.UnitTests/ztpai.UnitTests.csproj" Id="1fa8843c-4d0b-4271-873e-9ee3cec3a7cd" />
   <Project Path="ztpai/ztpai.csproj" />
 </Solution>

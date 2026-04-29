@@ -9,6 +9,8 @@ using Microsoft.EntityFrameworkCore;
 using ztpai;
 using ztpai.DTO;
 using ztpai.Models;
+using ztpai.Repository;
+using ztpai.Services;
 
 namespace ztpai.Controllers
 {
@@ -16,11 +18,11 @@ namespace ztpai.Controllers
     [ApiController]
     public class ProductsController : ControllerBase
     {
-        private readonly MyDbContext _context;
+        private readonly ProductService _service;
 
-        public ProductsController(MyDbContext context)
+        public ProductsController(ProductService service)
         {
-            _context = context;
+            _service = service;
         }
 
         // GET: api/Products
@@ -28,7 +30,7 @@ namespace ztpai.Controllers
         public async Task<ActionResult<IEnumerable<ProductResponseDTO>>> GetProducts()
         {
             var products =  await _context.Products.ToListAsync();
-
+            //TODO: Move response to repository/service
             var productsDto = products.Select(x => new ProductResponseDTO {
                 Name = x.Name,
                 Description = x.Description,
@@ -49,6 +51,7 @@ namespace ztpai.Controllers
                 return NotFound(new {message = $"Not found product id = {id}" });
             }
 
+            //TODO: Move response to repository/service
             var productDto = new ProductResponseDTO
             {
                 Name = product.Name,
@@ -61,10 +64,11 @@ namespace ztpai.Controllers
 
         // PUT: api/Products/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [Authorize(Roles ="Admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutProduct(int id, ProductRequestDTO productDto)
         {
-
+            //TODO: Move response to repository/service
             var product = new Product
             {
                 Id = id,
@@ -95,9 +99,11 @@ namespace ztpai.Controllers
 
         // POST: api/Products
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [Authorize(Roles ="Admin")]
         [HttpPost]
         public async Task<ActionResult<Product>> PostProduct(ProductRequestDTO productDto)
         {
+            //TODO: Move response to repository/service
             var product = new Product 
             {
                 Name = productDto.Name,
@@ -111,6 +117,7 @@ namespace ztpai.Controllers
         }
 
         // DELETE: api/Products/5
+        [Authorize(Roles ="Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct(int id)
         {
