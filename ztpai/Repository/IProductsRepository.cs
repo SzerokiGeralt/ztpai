@@ -7,8 +7,8 @@ namespace ztpai.Repository
     public interface IProductsRepository
     {
         Task<IEnumerable<Product>> GetAllProductsAsync();
-        Task<Product> GetProductByIdAsync(int productId);
-        Task UpdateProductAsync(int productId, Product request);
+        Task<Product?> GetProductByIdAsync(int productId);
+        Task UpdateProductAsync(Product request);
         Task DeleteProductAsync(int productId);
         Task AddProductAsync(Product request);
     }

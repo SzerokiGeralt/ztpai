@@ -19,12 +19,10 @@ namespace ztpai.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly IProductsService _service;
-        private readonly MyDbContext _context;
 
-        public ProductsController(IProductsService service, MyDbContext context)
+        public ProductsController(IProductsService service)
         {
             _service = service;
-            _context = context;
         }
 
         // GET: api/Products
