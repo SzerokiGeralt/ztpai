@@ -16,20 +16,14 @@ namespace ztpai.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ProductsController : ControllerBase
+    public class ProductsController(IProductsService productsService) : ControllerBase
     {
-        private readonly IProductsService _service;
-
-        public ProductsController(IProductsService service)
-        {
-            _service = service;
-        }
 
         // GET: api/Products
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ProductResponseDTO>>> GetProducts()
         {
-            var productsDto = await _service.GetProductsAsync();
+            var productsDto = await productsService.GetProductsAsync();
             return Ok(productsDto);
         }
 
@@ -37,20 +31,12 @@ namespace ztpai.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<ProductResponseDTO>> GetProductById(int id)
         {
-            var product = await _context.Products.FindAsync(id);
+            var productDto = await productsService.GetProductByIdAsync(id);
 
-            if (product == null)
+            if (productDto == null)
             {
                 return NotFound(new {message = $"Not found product id = {id}" });
             }
-
-            //TODO: Move response to repository/service
-            var productDto = new ProductResponseDTO
-            {
-                Name = product.Name,
-                Description = product.Description,
-                Price = product.Price
-            };
 
             return productDto;
         }
@@ -61,30 +47,11 @@ namespace ztpai.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateProduct(int id, ProductRequestDTO productDto)
         {
-            //TODO: Move response to repository/service
-            var product = new Product
+            var isUpdated = await productsService.UpdateProductAsync(id, productDto);
+            
+            if(!isUpdated)
             {
-                Id = id,
-                Name = productDto.Name,
-                Description = productDto.Description,
-                Price = productDto.Price
-            };
-            _context.Entry(product).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ProductExists(id))
-                {
-                    return NotFound(new { message = $"Not found product id = {id}" });
-                }
-                else
-                {
-                    throw;
-                }
+                return NotFound(new { message = $"Not found product id = {id}" });
             }
 
             return NoContent();
@@ -96,17 +63,9 @@ namespace ztpai.Controllers
         [HttpPost]
         public async Task<ActionResult<Product>> PostProduct(ProductRequestDTO productDto)
         {
-            //TODO: Move response to repository/service
-            var product = new Product 
-            {
-                Name = productDto.Name,
-                Description = productDto.Description,
-                Price = productDto.Price
-            };
-            _context.Products.Add(product);
-            await _context.SaveChangesAsync();
+            var product = await productsService.CreateProductAsync(productDto);
 
-            return CreatedAtAction("GetProduct", new { id = product.Id }, product);
+            return CreatedAtAction("GetProductById", new { id = product.Id }, product);
         }
 
         // DELETE: api/Products/5
@@ -114,23 +73,14 @@ namespace ztpai.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct(int id)
         {
-            var product = await _context.Products.FindAsync(id);
-            if (product == null)
+            var isDeleted = await productsService.DeleteProductAsync(id);
+
+            if (!isDeleted)
             {
                 return NotFound(new { message = $"Not found product id = {id}" });
             }
 
-            _context.Products.Remove(product);
-            await _context.SaveChangesAsync();
-
             return NoContent();
-        }
-
-        
-
-        private bool ProductExists(int id)
-        {
-            return _context.Products.Any(e => e.Id == id);
         }
     }
 }
