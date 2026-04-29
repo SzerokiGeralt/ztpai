@@ -9,6 +9,7 @@ namespace ztpai.Mappers
         {
             return new ProductResponseDTO
             {
+                Id = product.Id,
                 Name = product.Name,
                 Description = product.Description,
                 Price = product.Price
