@@ -1,6 +1,7 @@
 ﻿using ztpai.Models;
 using ztpai.Repository;
 using ztpai.DTO;
+using ztpai.Mappers;
 
 namespace ztpai.Services
 {
@@ -16,11 +17,7 @@ namespace ztpai.Services
         public async Task<IEnumerable<ProductResponseDTO>> GetProductsAsync()
         {
             var products = await _repository.GetAllProductsAsync();
-            var productsDto = products.Select(x => new ProductResponseDTO {
-                Name = x.Name,
-                Description = x.Description,
-                Price = x.Price
-            }).ToList();
+            var productsDto = products.Select(x => x.ToProductResponseDTO()).ToList();
 
             return productsDto;
         }
@@ -34,12 +31,7 @@ namespace ztpai.Services
                 return null;
             }
 
-            return new ProductResponseDTO
-            {
-                Name = product.Name,
-                Description = product.Description,
-                Price = product.Price
-            };
+            return product.ToProductResponseDTO();
         }
 
         public async Task<bool> UpdateProductAsync(int id, ProductRequestDTO productDto)
@@ -50,13 +42,7 @@ namespace ztpai.Services
                 return false; // not found
             }
 
-            var updatedProduct = new Product
-            {
-                Id = id,
-                Name = productDto.Name,
-                Description = productDto.Description,
-                Price = productDto.Price
-            };
+            var updatedProduct = productDto.ToProduct(id);
 
             await _repository.UpdateProductAsync(updatedProduct);
             return true;
@@ -64,12 +50,7 @@ namespace ztpai.Services
 
         public async Task<Product> CreateProductAsync(ProductRequestDTO productDto)
         {
-            var product = new Product 
-            {
-                Name = productDto.Name,
-                Description = productDto.Description,
-                Price = productDto.Price
-            };
+            var product = productDto.ToProduct();
 
             await _repository.AddProductAsync(product);
             return product; // To return the generated Id
