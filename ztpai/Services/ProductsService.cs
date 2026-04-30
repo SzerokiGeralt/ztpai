@@ -50,10 +50,15 @@ namespace ztpai.Services
 
         public async Task<Product> CreateProductAsync(ProductRequestDTO productDto)
         {
+            if (string.IsNullOrEmpty(productDto.Name))
+            {
+                throw new ArgumentException("Product name cannot be null or empty.");
+            }
+
             var product = productDto.ToProduct();
 
             await _repository.AddProductAsync(product);
-            return product; // To return the generated Id
+            return product;
         }
 
         public async Task<bool> DeleteProductAsync(int id)

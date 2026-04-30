@@ -56,5 +56,73 @@ namespace ztpai.UnitTests.ServicesTests
             //Verify
             _mockRepository.Verify(x => x.GetProductByIdAsync(99), Times.Once());
         }
+
+        [Fact]
+        public async Task CreateProductAsync_ValidProduct_ReturnsProductWithId()
+        {
+            // Arrange
+            var requestDto = new DTO.ProductRequestDTO
+            {
+                Name = "New Product",
+                Description = "Description",
+                Price = 15.0M
+            };
+
+            _mockRepository.Setup(x => x.AddProductAsync(It.IsAny<Product>()))
+                .Callback<Product>(p => p.Id = 123)
+                .Returns(Task.CompletedTask); 
+
+            var productsService = new ProductsService(_mockRepository.Object);
+
+            // Act
+            var result = await productsService.CreateProductAsync(requestDto);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(123, result.Id);
+
+            // Verify
+            _mockRepository.Verify(x => x.AddProductAsync(It.IsAny<Product>()), Times.Once());
+        }
+
+        [Fact]
+        public async Task CreateProductAsync_NullName_ThrowsArgumentException()
+        {
+            // Arrange
+            var requestDto = new DTO.ProductRequestDTO
+            {
+                Name = null,
+                Description = "Description",
+                Price = 15.0M
+            };
+
+            var productsService = new ProductsService(_mockRepository.Object);
+
+            // Act
+            Action exceptionCode = async () => await productsService.CreateProductAsync(requestDto);
+
+            // Assert
+            Assert.Throws<ArgumentException>(exceptionCode);
+        }
+
+        [Fact]
+        public async Task CreateProductAsync_EmptyName_ThrowsArgumentException()
+        {
+            // Arrange
+            var requestDto = new DTO.ProductRequestDTO
+            {
+                Name = string.Empty,
+                Description = "Description",
+                Price = 15.0M
+            };
+
+            var productsService = new ProductsService(_mockRepository.Object);
+
+            // Act
+            Action exceptionCode = async () => await productsService.CreateProductAsync(requestDto);
+
+            // Assert
+            Assert.Throws<ArgumentException>(exceptionCode);
+        }
     }
 }
