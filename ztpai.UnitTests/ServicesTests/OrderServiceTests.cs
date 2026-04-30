@@ -29,7 +29,7 @@ namespace ztpai.UnitTests.ServicesTests
 
             //Act
             var service = new OrderService(_repositoryMock.Object);
-            var result = service.calculateTotal(productList);
+            var result = service.CalculateTotal(productList);
 
             //Assert
             Assert.Equal(60.0M,result);
@@ -43,7 +43,7 @@ namespace ztpai.UnitTests.ServicesTests
 
             //Act
             var service = new OrderService(_repositoryMock.Object);
-            var result = service.calculateTotal(productList);
+            var result = service.CalculateTotal(productList);
 
             //Assert
             Assert.Equal(0.0M, result);
@@ -57,7 +57,7 @@ namespace ztpai.UnitTests.ServicesTests
 
             //Act
             var service = new OrderService(_repositoryMock.Object);
-            Action exceptionCode = () => service.calculateTotal(null!);
+            Action exceptionCode = () => service.CalculateTotal(null!);
 
             //Assert
             Assert.Throws<ArgumentNullException>(exceptionCode);

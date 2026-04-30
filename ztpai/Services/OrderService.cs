@@ -11,7 +11,7 @@ namespace ztpai.Services
         {
             _repository = repository;
         }
-        public decimal calculateTotal(List<Product> products)
+        public decimal CalculateTotal(List<Product> products)
         {
             if (products is null) throw new ArgumentNullException("Calculate total list null reference");
             decimal sum = 0.0M;

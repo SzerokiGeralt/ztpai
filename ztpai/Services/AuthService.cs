@@ -10,6 +10,7 @@ using ztpai.Models;
 
 namespace ztpai.Services
 {
+    //TODO: Move context to dedicated IUserRepository and UserRepository
     public class AuthService(MyDbContext context, IConfiguration configuration) : IAuthService
     {
         public async Task<TokenResponseDTO?> LoginAsync(UserDTO request)
@@ -17,11 +18,11 @@ namespace ztpai.Services
             var user = await context.Users.FirstOrDefaultAsync(u => u.Username == request.Username);
             if (user is null)
             {
-                throw new Exception("User not found");
+                throw new ArgumentException("User not found");
             }
             if (new PasswordHasher<User>().VerifyHashedPassword(user, user.PasswordHash, request.Password) == PasswordVerificationResult.Failed)
             {
-                throw new Exception("Wrong password");
+                throw new ArgumentException("Wrong password");
             }
 
             return await CreateResponseToken(user);
@@ -92,8 +93,15 @@ namespace ztpai.Services
         private async Task<string> GenerateAndSaveRefreshToken(User user)
         {
             var refreshToken = GenerateRefreshToken();
-            user.RefreshToken = refreshToken;
-            user.RefreshTokenExpiration = DateTime.UtcNow.AddDays(7);
+            try
+            {
+                user.RefreshToken = refreshToken;
+                user.RefreshTokenExpiration = DateTime.UtcNow.AddDays(7);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
             await context.SaveChangesAsync();
             return refreshToken;
         }
