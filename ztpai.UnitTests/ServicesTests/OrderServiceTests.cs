@@ -39,7 +39,7 @@ namespace ztpai.UnitTests.ServicesTests
         public void CalculateTotal_EmptyList_ReturnsZero()
         {
             //Arrange
-            List<Product> productList = null!;
+            List<Product> productList = new();
 
             //Act
             var service = new OrderService(_repositoryMock.Object);

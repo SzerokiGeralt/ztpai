@@ -22,7 +22,7 @@ namespace ztpai.UnitTests.ServicesTests
         {
             //Arrange
             _mockRepository.Setup(x => x.GetProductByIdAsync(1))
-                .Returns(() => new Product { 
+                .ReturnsAsync(new Product { 
                     Id = 1, 
                     Name = "Mock product", 
                     Description = "Mock product desc", 
@@ -36,6 +36,25 @@ namespace ztpai.UnitTests.ServicesTests
             Assert.NotNull(result);
             Assert.Equal("Mock product", result.Name);
 
+            // Verify
+            _mockRepository.Verify(x => x.GetProductByIdAsync(1), Times.Once());
+        }
+
+        [Fact]
+        public async Task GetProductById_WithWrongId_ReturnsNull()
+        {
+            //Arrange
+            _mockRepository.Setup(x => x.GetProductByIdAsync(99))
+                .ReturnsAsync((Product)null!);
+            //Act
+            var productsService = new ProductsService(_mockRepository.Object);
+            var result = await productsService.GetProductByIdAsync(99);
+
+            //Assert
+            Assert.Null(result);
+
+            //Verify
+            _mockRepository.Verify(x => x.GetProductByIdAsync(99), Times.Once());
         }
     }
 }
