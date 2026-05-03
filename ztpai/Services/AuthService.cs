@@ -7,15 +7,15 @@ using System.Security.Cryptography;
 using System.Text;
 using ztpai.DTO;
 using ztpai.Models;
+using ztpai.Repository;
 
 namespace ztpai.Services
 {
-    //TODO: Move context to dedicated IUserRepository and UserRepository
-    public class AuthService(MyDbContext context, IConfiguration configuration) : IAuthService
+    public class AuthService(IUsersRepository usersRepository, IConfiguration configuration) : IAuthService
     {
         public async Task<TokenResponseDTO?> LoginAsync(UserDTO request)
         {
-            var user = await context.Users.FirstOrDefaultAsync(u => u.Username == request.Username);
+            var user = await usersRepository.GetUserByUsernameAsync(request.Username);
             if (user is null)
             {
                 throw new ArgumentException("User not found");
@@ -39,7 +39,7 @@ namespace ztpai.Services
 
         public async Task<User?> RegisterAsync(UserDTO request)
         {
-            if (await context.Users.AnyAsync(u => u.Username == request.Username))
+            if (await usersRepository.UsernameExistsAsync(request.Username))
             {
                 throw new Exception("User already exists");
             }
@@ -50,8 +50,7 @@ namespace ztpai.Services
             user.Username = request.Username;
             user.PasswordHash = hashedPassword;
 
-            context.Users.Add(user);
-            await context.SaveChangesAsync();
+            await usersRepository.AddUserAsync(user);
 
             return user;
         }
@@ -95,20 +94,18 @@ namespace ztpai.Services
             var refreshToken = GenerateRefreshToken();
             try
             {
-                user.RefreshToken = refreshToken;
-                user.RefreshTokenExpiration = DateTime.UtcNow.AddDays(7);
+                await usersRepository.RefreshTokenAsync(user, refreshToken, 7);
             }
             catch (Exception)
             {
                 throw;
             }
-            await context.SaveChangesAsync();
             return refreshToken;
         }
 
         public async Task<User?> ValidateRefreshTokenAsync(Guid userId, string refreshToken)
         {
-            var user = await context.Users.FindAsync(userId);
+            var user = await usersRepository.GetUserByIdAsync(userId);
             if (user is null || user.RefreshToken != refreshToken || user.RefreshTokenExpiration <= DateTime.UtcNow) { return null; }
             return user;
         }
