@@ -1,4 +1,6 @@
 ﻿
+
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Moq;
@@ -6,52 +8,89 @@ using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
+using ztpai.DTO;
 using ztpai.Models;
+using ztpai.Repository;
 using ztpai.Services;
 
 namespace ztpai.UnitTests.ServicesTests
 {
     public class AuthServiceTests
     {
-        private readonly MyDbContext _inMemoryContext;
-        private readonly Mock<IConfiguration> _mockConfiguration;
+        private readonly Mock<IUsersRepository> _mockUserRepository;
+        private readonly IConfiguration _mockConfiguration;
         private readonly string _mockToken = "mockToken" + Convert.ToBase64String(RandomNumberGenerator.GetBytes(255));
         public AuthServiceTests()
         {
-            _mockConfiguration = new(MockBehavior.Strict);
-            _mockConfiguration.Setup(x => x.GetValue<string>("AppSettings:Token")).Returns(_mockToken);
-            _mockConfiguration.Setup(x => x.GetValue<string>("AppSettings:Audience")).Returns("mockAudience");
-            _mockConfiguration.Setup(x => x.GetValue<string>("AppSettings:Issuer")).Returns("mockIssuer");
-        }
+            var myConfiguration = new Dictionary<string, string>
+            {
+                {"AppSettings:Token", _mockToken},
+                {"AppSettings:Issuer", "my-test-issuer"},
+                {"AppSettings:Audience", "my-test-audience"}
+            };
 
-        //TODO: AuthServiceTest1
-        [Fact]
-        public void Login_UserNotFound_ThrowsException()
-        {
-            //Arrange
+            _mockConfiguration = new ConfigurationBuilder()
+                .AddInMemoryCollection(myConfiguration!)
+                .Build();
 
-            //Act
-
-            //Assert
+            _mockUserRepository = new(MockBehavior.Strict);
 
         }
 
-        //TODO: AuthServiceTest2
         [Fact]
-        public void Login_WrongPassowrd_ThrowsException()
+        public async Task Login_UserNotFound_ThrowsException()
         {
             //Arrange
+            _mockUserRepository.Setup(r => r.GetUserByUsernameAsync("admin")).ReturnsAsync((User)null!);
+            var service = new AuthService(_mockUserRepository.Object, _mockConfiguration);
+            UserDTO userLogin = new UserDTO { Password = "correct_password", Username = "admin" };
+
             //Act
+            var exceptionCode = () => service.LoginAsync(userLogin);
+
             //Assert
+            var ex = await Assert.ThrowsAsync<ArgumentException>(exceptionCode);
+            Assert.Equal("User not found", ex.Message);
         }
 
-        //TODO: AuthServiceTest3
         [Fact]
-        public void Login_Correct_ReturnsResponseToken()
+        public async Task Login_WrongPassword_ThrowsException()
         {
             //Arrange
+            var userRepo = new User();
+            userRepo.Username = "admin";
+            userRepo.PasswordHash = new PasswordHasher<User>().HashPassword(userRepo, "correct_password");
+            
+            _mockUserRepository.Setup(r => r.GetUserByUsernameAsync("admin")).ReturnsAsync(userRepo);
+            var service = new AuthService(_mockUserRepository.Object, _mockConfiguration);
+            UserDTO userLogin = new UserDTO { Password = "wrong_password", Username = "admin" };
+
             //Act
+            var exceptionCode = () => service.LoginAsync(userLogin);
+
             //Assert
+            var ex = await Assert.ThrowsAsync<ArgumentException>(exceptionCode);
+            Assert.Equal("Wrong password", ex.Message);
+        }
+
+        [Fact]
+        public async Task Login_Correct_ReturnsResponseToken()
+        {
+            //Arrange
+            var userRepo = new User();
+            userRepo.Username = "admin";
+            userRepo.PasswordHash = new PasswordHasher<User>().HashPassword(userRepo, "correct_password");
+
+            _mockUserRepository.Setup(r => r.GetUserByUsernameAsync("admin")).ReturnsAsync(userRepo);
+            var service = new AuthService(_mockUserRepository.Object, _mockConfiguration);
+            UserDTO userLogin = new UserDTO { Password = "correct_password", Username = "admin" };
+
+            _mockUserRepository.Setup(r => r.RefreshTokenAsync(userRepo, It.IsAny<string>(), It.IsAny<int>())).Returns(Task.CompletedTask);
+            //Act
+            var result = await service.LoginAsync(userLogin);
+
+            //Assert
+            Assert.IsType<TokenResponseDTO>(result);
         }
 
         //TODO: AuthServiceTest4

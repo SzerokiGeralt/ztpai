@@ -99,10 +99,11 @@ namespace ztpai.UnitTests.ServicesTests
             var productsService = new ProductsService(_mockRepository.Object);
 
             // Act
-            Action exceptionCode = async () => await productsService.CreateProductAsync(requestDto);
+            var exceptionCode = () => productsService.CreateProductAsync(requestDto);
 
             // Assert
-            Assert.Throws<ArgumentException>(exceptionCode);
+            var ex = await Assert.ThrowsAsync<ArgumentException>(exceptionCode);
+            Assert.Equal("Product name cannot be null or empty.", ex.Message);
         }
 
         [Fact]
@@ -119,10 +120,11 @@ namespace ztpai.UnitTests.ServicesTests
             var productsService = new ProductsService(_mockRepository.Object);
 
             // Act
-            Action exceptionCode = async () => await productsService.CreateProductAsync(requestDto);
+            var exceptionCode = () => productsService.CreateProductAsync(requestDto);
 
             // Assert
-            Assert.Throws<ArgumentException>(exceptionCode);
+            var ex = await Assert.ThrowsAsync<ArgumentException>(exceptionCode);
+            Assert.Equal("Product name cannot be null or empty.", ex.Message);
         }
     }
 }
