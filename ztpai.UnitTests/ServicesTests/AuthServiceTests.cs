@@ -93,31 +93,67 @@ namespace ztpai.UnitTests.ServicesTests
             Assert.IsType<TokenResponseDTO>(result);
         }
 
-        //TODO: AuthServiceTest4
         [Fact]
-        public void RefreshTokenGeneration_CorrectUser_UpdatesExpirationDate()
+        public async Task RefreshTokensAsync_TokenValid_ReturnsResponse()
         {
             //Arrange
+            var userGuid = Guid.NewGuid();
+            var userRepo = new User();
+            userRepo.Username = "admin";
+            userRepo.PasswordHash = new PasswordHasher<User>().HashPassword(userRepo, "correct_password");
+            userRepo.RefreshToken = "123";
+            userRepo.RefreshTokenExpiration = DateTime.UtcNow.AddDays(1);
+
+            var service = new AuthService(_mockUserRepository.Object, _mockConfiguration);
+            RefreshTokenRequestDTO refresh = new() { RefreshToken = "123", UserID = userGuid };
+
+            _mockUserRepository.Setup(r => r.GetUserByIdAsync(userGuid)).ReturnsAsync(userRepo);
+            _mockUserRepository.Setup(r => r.RefreshTokenAsync(It.IsAny<User>(), It.IsAny<string>(), It.IsAny<int>())).Returns(Task.CompletedTask);
+
             //Act
+            var result = await service.RefreshTokensAsync(refresh);
+
             //Assert
+            Assert.IsType<TokenResponseDTO>(result);
         }
 
-        //TODO: AuthServiceTest5
         [Fact]
-        public void RefreshTokenGeneration_InvalidUser_ThrowsException()
+        public async Task RefreshTokensAsync_TokenExpired_ReturnsNull()
         {
             //Arrange
+            var userGuid = Guid.NewGuid();
+            var userRepo = new User();
+            userRepo.Username = "admin";
+            userRepo.PasswordHash = new PasswordHasher<User>().HashPassword(userRepo, "correct_password");
+            userRepo.RefreshToken = "123";
+            userRepo.RefreshTokenExpiration = DateTime.UtcNow.AddDays(-1);
+
+            var service = new AuthService(_mockUserRepository.Object, _mockConfiguration);
+            RefreshTokenRequestDTO refresh = new() { RefreshToken = "123", UserID = userGuid };
+
+            _mockUserRepository.Setup(r => r.GetUserByIdAsync(userGuid)).ReturnsAsync(userRepo);
+
             //Act
+            var result = await service.RefreshTokensAsync(refresh);
+
             //Assert
+            Assert.Null(result);
         }
 
-        //TODO: AuthServiceTest6
         [Fact]
-        public void Registration_UserExists_ThrowsException()
+        public async Task Registration_UserExists_ThrowsException()
         {
             //Arrange
+            _mockUserRepository.Setup(r => r.UsernameExistsAsync("admin")).ReturnsAsync(true);
+            var service = new AuthService(_mockUserRepository.Object, _mockConfiguration);
+            UserDTO userRegister = new UserDTO { Password = "correct_password", Username = "admin" };
+
             //Act
+            var exceptionCode = () => service.RegisterAsync(userRegister);
+
             //Assert
+            var ex = await Assert.ThrowsAsync<ArgumentException>(exceptionCode);
+            Assert.Equal("User already exists", ex.Message);
         }
     }
 }

@@ -41,7 +41,7 @@ namespace ztpai.Services
         {
             if (await usersRepository.UsernameExistsAsync(request.Username))
             {
-                throw new Exception("User already exists");
+                throw new ArgumentException("User already exists");
             }
 
             var user = new User();
