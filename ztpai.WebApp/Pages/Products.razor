@@ -1,0 +1,55 @@
+﻿@page "/products"
+@inject HttpClient Http
+
+<PageTitle>Products list</PageTitle>
+
+<h1>Products from web api endpoint</h1>
+
+
+<button class="btn btn-primary" @onclick="FetchData">FetchData</button>
+
+@if (products == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var product in products)
+            {
+                <tr>
+                    <td>@product.Id</td>
+                    <td>@product.Name</td>
+                    <td>@product.Description</td>
+                    <td>@product.Price</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Product>? products;
+
+    private async Task FetchData()
+    {
+        products = await Http.GetFromJsonAsync<List<Product>>("https://localhost:7094/api/products");
+    }
+
+    public class Product
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string? Description { get; set; }
+        public decimal Price { get; set; }
+    }
+}

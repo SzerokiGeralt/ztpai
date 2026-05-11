@@ -2,5 +2,6 @@
   <Project Path="ztpai.UnitTests/ztpai.UnitTests.csproj" Id="1fa8843c-4d0b-4271-873e-9ee3cec3a7cd">
     <Build Solution="Debug|*" Project="false" />
   </Project>
+  <Project Path="ztpai.WebApp/ztpai.WebApp.csproj" Id="5d552b22-1307-414f-ae8b-c4a48dc3f9ec" />
   <Project Path="ztpai/ztpai.csproj" />
 </Solution>

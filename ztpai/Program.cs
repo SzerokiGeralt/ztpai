@@ -72,6 +72,11 @@ namespace ztpai
                 app.MapScalarApiReference();
             }
 
+            app.UseCors(policy =>
+            policy.WithOrigins("https://localhost:7222")
+            .AllowAnyMethod()
+            .AllowAnyHeader());
+
             app.UseExceptionHandler(_ => { });
 
             app.UseHttpsRedirection();
