@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Minio;
 using Scalar.AspNetCore;
 using System.Text;
 using ztpai.Middleware;
@@ -42,6 +43,7 @@ namespace ztpai
             builder.Services.AddScoped<IProductsRepository, ProductsRepository>();
             builder.Services.AddScoped<IProductsService, ProductsService>();
             builder.Services.AddScoped<IUsersRepository, UsersRepository>();
+            builder.Services.AddScoped<IMinioService, MinioService>();
 
             builder.Services.AddDbContext<MyDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -62,6 +64,11 @@ namespace ztpai
                             Encoding.UTF8.GetBytes(builder.Configuration["AppSettings:Token"]!))
                     };
                 });
+
+            builder.Services.AddMinio(configureSource => configureSource
+                .WithEndpoint(builder.Configuration["Minio:Address"])
+                .WithCredentials(builder.Configuration["Minio:Login"], builder.Configuration["Minio:Password"])
+                .WithSSL(false)); // When local we dont use SSL
 
             var app = builder.Build();
 

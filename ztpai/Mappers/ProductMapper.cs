@@ -12,7 +12,8 @@ namespace ztpai.Mappers
                 Id = product.Id,
                 Name = product.Name,
                 Description = product.Description,
-                Price = product.Price
+                Price = product.Price,
+                ImageUrl = product.ImageUrl
             };
         }
 
@@ -23,7 +24,8 @@ namespace ztpai.Mappers
                 Id = id,
                 Name = productDto.Name,
                 Description = productDto.Description,
-                Price = productDto.Price
+                Price = productDto.Price,
+                ImageUrl = productDto.ImageUrl ?? string.Empty
             };
         }
     }
