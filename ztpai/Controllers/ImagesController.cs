@@ -6,7 +6,7 @@ namespace ztpai.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ImagesController(IMinioService minioService) : ControllerBase
+    public class ImagesController(IProductImageService minioService) : ControllerBase
     {
         [Authorize(Roles = "Admin")]
         [HttpPost("upload")]

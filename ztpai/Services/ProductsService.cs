@@ -72,5 +72,19 @@ namespace ztpai.Services
             await _repository.DeleteProductAsync(id);
             return true;
         }
+
+        public async Task<bool> UpdateProductImageAsync(int id, string imageUrl)
+        {
+            var product = await _repository.GetProductByIdAsync(id);
+            if (product == null)
+            {
+                return false; // not found
+            }
+
+            product.ImageUrl = imageUrl;
+
+            await _repository.UpdateProductAsync(product);
+            return true;
+        }
     }
 }

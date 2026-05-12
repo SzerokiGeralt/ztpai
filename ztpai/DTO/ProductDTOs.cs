@@ -13,6 +13,7 @@ namespace ztpai.DTO
         [Range(0, double.MaxValue, ErrorMessage = "Price needs to be equal or grater than 0")]
         public decimal Price { get; set; }
         public string? ImageUrl { get; set; }
+        public uint InStock { get; set; }
     }
 
     public class ProductResponseDTO
@@ -22,5 +23,6 @@ namespace ztpai.DTO
         public string? Description { get; set; }
         public decimal Price { get; set; }
         public string? ImageUrl { get; set; }
+        public uint InStock { get; set; }
     }
 }

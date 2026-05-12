@@ -10,5 +10,6 @@ namespace ztpai.Services
         Task<bool> UpdateProductAsync(int id, ProductRequestDTO productDto);
         Task<Product> CreateProductAsync(ProductRequestDTO productDto);
         Task<bool> DeleteProductAsync(int id);
+        Task<bool> UpdateProductImageAsync(int id, string  newImageUrl);
     }
 }

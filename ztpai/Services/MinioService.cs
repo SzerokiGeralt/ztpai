@@ -3,7 +3,7 @@ using Minio.DataModel.Args;
 
 namespace ztpai.Services
 {
-    public class MinioService(IMinioClient minioClient) : IMinioService
+    public class MinioService(IMinioClient minioClient) : IProductImageService
     {
         private const string BucketName = "productphotos";
 
