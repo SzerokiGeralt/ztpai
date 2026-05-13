@@ -7,7 +7,7 @@ using ztpai.Services;
 
 namespace ztpai.Controllers
 {
-    [Route("api/{controller}")]
+    [Route("api/[controller]")]
     [ApiController]
     public class OrdersController(IOrderService orderService) : ControllerBase
     {
