@@ -7,6 +7,7 @@ namespace ztpai.DTO
         [Required(AllowEmptyStrings =false, ErrorMessage ="Product name is required")]
         [MinLength(3, ErrorMessage = "Name needs to be at least 3 characters long")]
         public string? Name { get; set; }
+        [Required(AllowEmptyStrings = false, ErrorMessage = "Product description is required")]
         [MinLength(3, ErrorMessage = "Description needs to be at least 3 characters long")]
         public string? Description { get; set; }
         
