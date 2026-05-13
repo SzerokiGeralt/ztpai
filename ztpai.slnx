@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="NotificationService/ztpai.NotificationService.csproj" Id="090a0dad-d716-4484-87fd-fd66cc94fc35" />
   <Project Path="ztpai.UnitTests/ztpai.UnitTests.csproj" Id="1fa8843c-4d0b-4271-873e-9ee3cec3a7cd">
     <Build Solution="Debug|*" Project="false" />
   </Project>

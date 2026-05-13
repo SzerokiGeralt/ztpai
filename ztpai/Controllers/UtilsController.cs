@@ -2,6 +2,7 @@
 
 namespace ztpai.Controllers
 {
+    public record HealthResponseDTO(string apiVersion, string status, DateTime currentTime);
     [Route("api/[controller]")]
     [ApiController]
     public class UtilsController : ControllerBase
@@ -9,12 +10,8 @@ namespace ztpai.Controllers
         [HttpGet("health")]
         public IActionResult CheckHealth()
         {
-            return Ok(new 
-            {
-                apiVersion = 1,
-                status = "active",
-                currentLocalTime = DateTime.Now,
-            });
+            var response = new HealthResponseDTO("v1.0", "healthy", DateTime.Now);
+            return Ok(response);
         }
     }
 }
