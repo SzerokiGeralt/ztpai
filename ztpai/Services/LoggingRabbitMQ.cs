@@ -11,7 +11,9 @@ namespace ztpai.Services
         {
             var factory = new ConnectionFactory
             {
-                HostName = configuration.GetValue<string>("RabbitMq:Host") ?? "localhost"
+                HostName = configuration.GetValue<string>("RabbitMq:Host") ?? "localhost",
+                UserName = configuration.GetValue<string>("RabbitMq:Username") ?? "admin",
+                Password = configuration.GetValue<string>("RabbitMq:Password") ?? "admin"
             };
 
             using var connection = factory.CreateConnectionAsync().GetAwaiter().GetResult();

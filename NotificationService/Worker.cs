@@ -1,35 +1,43 @@
-using System.Net.Http.Json;
+using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
+using System.Text;
 
 namespace NotificationService
 {
-    public record HealthResponseDTO(string apiVersion, string status, DateTime currentTime);
-
-    public class Worker(ILogger<Worker> logger, IHttpClientFactory httpClientFactory) : BackgroundService
+    public class Worker(ILogger<Worker> logger, IConfiguration configuration) : BackgroundService
     {
+        private const string QueueName = "logs";
+
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            var client = httpClientFactory.CreateClient();
-
-            logger.LogInformation("Waiting for web api to start...");
-
-            while (!stoppingToken.IsCancellationRequested)
+            var factory = new ConnectionFactory
             {
-                try
-                {
-                    using var response = await client.GetAsync("https://localhost:7094/api/utils/health", stoppingToken);
-                    response.EnsureSuccessStatusCode();
+                HostName = configuration.GetValue<string>("RabbitMq:Host") ?? "localhost",
+                UserName = configuration.GetValue<string>("RabbitMq:Username") ?? "admin",
+                Password = configuration.GetValue<string>("RabbitMq:Password") ?? "admin"
+            };
 
-                    var health = await response.Content.ReadFromJsonAsync<HealthResponseDTO>(cancellationToken: stoppingToken);
+            using var connection = await factory.CreateConnectionAsync(stoppingToken);
+            using var channel = await connection.CreateChannelAsync();
 
-                    logger.LogInformation("Health check: {ApiVersion} {Status} {CurrentTime}",
-                        health?.apiVersion, health?.status, health?.currentTime);
-                }
-                catch (Exception ex)
-                {
-                    logger.LogInformation($"Health check: {ex.Message}");
-                }
-                await Task.Delay(5000, stoppingToken);
-            }
+            await channel.QueueDeclareAsync(queue: QueueName, durable: false, exclusive: false, autoDelete: false, arguments: null, cancellationToken: stoppingToken);
+
+            var sessionFilePath = Path.Combine(AppContext.BaseDirectory, $"logs-{DateTime.UtcNow:yyyyMMdd-HHmmss}.txt");
+            await using var fileStream = new FileStream(sessionFilePath, FileMode.Create, FileAccess.Write, FileShare.Read);
+            await using var writer = new StreamWriter(fileStream) { AutoFlush = true };
+
+            var consumer = new AsyncEventingBasicConsumer(channel);
+            consumer.ReceivedAsync += async (_, args) =>
+            {
+                var message = Encoding.UTF8.GetString(args.Body.Span);
+                await writer.WriteLineAsync($"{DateTime.Now} - {message}");
+            };
+
+            await channel.BasicConsumeAsync(queue: QueueName, autoAck: true, consumer: consumer, cancellationToken: stoppingToken);
+
+            logger.LogInformation("Logging worker started. Writing logs to {Path}", sessionFilePath);
+
+            await Task.Delay(Timeout.Infinite, stoppingToken);
         }
     }
 }
