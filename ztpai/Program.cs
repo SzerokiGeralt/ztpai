@@ -46,6 +46,7 @@ namespace ztpai
             builder.Services.AddScoped<IOrderRepository, OrderRepository>();
             builder.Services.AddScoped<IOrderService, OrderService>();
             builder.Services.AddScoped<IProductImageService, MinioService>();
+            builder.Services.AddScoped<ILoggingService, LoggingRabbitMQ>();
 
             builder.Services.AddDbContext<MyDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
