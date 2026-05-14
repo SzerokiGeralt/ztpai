@@ -9,5 +9,6 @@ namespace ztpai.Repository
         Task AddUserAsync(User user);
         Task<User?> GetUserByIdAsync(Guid userId);
         Task RefreshTokenAsync(User user, string newRefreshToken, int days);
+        Task SaveChangesAsync();
     }
 }

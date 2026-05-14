@@ -33,5 +33,10 @@ namespace ztpai.Repository
         {
             return context.Users.Where(u =>  u.Username == username).Any();
         }
+
+        public async Task SaveChangesAsync()
+        {
+            await context.SaveChangesAsync();
+        }
     }
 }

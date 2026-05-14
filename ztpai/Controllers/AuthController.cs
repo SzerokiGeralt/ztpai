@@ -67,5 +67,35 @@ namespace ztpai.Controllers
             if (result is null || result.AccessToken is null || result.RefreshToken is null) return Unauthorized("Invalid refresh token");
             return Ok(result);
         }
+
+        [Authorize]
+        [HttpPut("password")]
+        public async Task<IActionResult> UpdatePassword(UpdateUserPasswordDTO request)
+        {
+            try
+            {
+                await authService.UpdatePasswordAsync(request, User);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPut("role")]
+        public async Task<IActionResult> UpdateRole(UpdateUserRoleDTO request)
+        {
+            try
+            {
+                await authService.UpdateRoleAsync(request);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

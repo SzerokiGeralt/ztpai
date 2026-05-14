@@ -116,5 +116,40 @@ namespace ztpai.Services
             if (user is null) return null;
             return await CreateResponseToken(user);
         }
+
+        public async Task UpdatePasswordAsync(UpdateUserPasswordDTO request, ClaimsPrincipal user)
+        {
+            var usernameClaim = user.FindFirstValue(ClaimTypes.Name);
+            if (string.IsNullOrWhiteSpace(usernameClaim) || !string.Equals(usernameClaim, request.Username, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new UnauthorizedAccessException("Cannot change password for another user");
+            }
+
+            var existingUser = await usersRepository.GetUserByUsernameAsync(request.Username);
+            if (existingUser is null)
+            {
+                throw new ArgumentException("User not found");
+            }
+
+            if (new PasswordHasher<User>().VerifyHashedPassword(existingUser, existingUser.PasswordHash, request.CurrentPassword) == PasswordVerificationResult.Failed)
+            {
+                throw new ArgumentException("Wrong password");
+            }
+
+            existingUser.PasswordHash = new PasswordHasher<User>().HashPassword(existingUser, request.NewPassword);
+            await usersRepository.SaveChangesAsync();
+        }
+
+        public async Task UpdateRoleAsync(UpdateUserRoleDTO request)
+        {
+            var existingUser = await usersRepository.GetUserByUsernameAsync(request.Username);
+            if (existingUser is null)
+            {
+                throw new ArgumentException("User not found");
+            }
+
+            existingUser.Role = request.Role;
+            await usersRepository.SaveChangesAsync();
+        }
     }
 }
