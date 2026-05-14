@@ -1,0 +1,54 @@
+@page "/login"
+@inject ztpai.WebApp.Services.AuthApiService AuthApi
+@inject ztpai.WebApp.Services.AuthState AuthState
+@inject NavigationManager Navigation
+
+<PageTitle>Login</PageTitle>
+
+<h1>Logowanie</h1>
+
+<EditForm Model="request" OnValidSubmit="HandleLogin">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label class="form-label">Nazwa użytkownika</label>
+        <InputText class="form-control" @bind-Value="request.Username" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Hasło</label>
+        <InputText class="form-control" @bind-Value="request.Password" type="password" />
+    </div>
+    <button class="btn btn-primary" type="submit">Zaloguj</button>
+
+    @if (!string.IsNullOrWhiteSpace(error))
+    {
+        <div class="text-danger mt-3">@error</div>
+    }
+</EditForm>
+
+@code {
+    private ztpai.WebApp.Models.LoginRequest request = new();
+    private string? error;
+
+    private async Task HandleLogin()
+    {
+        error = null;
+        try
+        {
+            var token = await AuthApi.LoginAsync(request);
+            if (token is null)
+            {
+                error = "Brak odpowiedzi z serwera.";
+                return;
+            }
+
+            await AuthState.SetSessionAsync(token);
+            Navigation.NavigateTo("/");
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+    }
+}

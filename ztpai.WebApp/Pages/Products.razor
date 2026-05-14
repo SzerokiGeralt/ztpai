@@ -1,16 +1,14 @@
 ﻿@page "/products"
-@inject HttpClient Http
+@inject ztpai.WebApp.Services.ProductsApiService ProductsApi
+@inject ztpai.WebApp.Services.AuthState AuthState
 
-<PageTitle>Products list</PageTitle>
+<PageTitle>Produkty</PageTitle>
 
-<h1>Products from web api endpoint</h1>
+<h1>Produkty</h1>
 
-
-<button class="btn btn-primary" @onclick="FetchData">FetchData</button>
-
-@if (products == null)
+@if (products is null)
 {
-    <p><em>Loading...</em></p>
+    <p><em>Ładowanie...</em></p>
 }
 else
 {
@@ -18,9 +16,14 @@ else
         <thead>
             <tr>
                 <th>Id</th>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Price</th>
+                <th>Nazwa</th>
+                <th>Opis</th>
+                <th>Cena</th>
+                <th>Na stanie</th>
+                @if (AuthState.IsAdmin)
+                {
+                    <th>Akcje</th>
+                }
             </tr>
         </thead>
         <tbody>
@@ -31,25 +34,65 @@ else
                     <td>@product.Name</td>
                     <td>@product.Description</td>
                     <td>@product.Price</td>
+                    <td>@product.InStock</td>
+                    @if (AuthState.IsAdmin)
+                    {
+                        <td>
+                            <a class="btn btn-sm btn-outline-primary me-2" href="/products/edit/@product.Id">Edytuj</a>
+                            <button class="btn btn-sm btn-outline-danger" @onclick="() => Delete(product.Id)">Usuń</button>
+                        </td>
+                    }
                 </tr>
             }
         </tbody>
     </table>
 }
 
+@if (AuthState.IsAdmin)
+{
+    <div class="mt-4">
+        <a class="btn btn-primary" href="/products/new">Dodaj produkt</a>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(message))
+    {
+        <div class="mt-3">@message</div>
+    }
+}
+
 @code {
-    private List<Product>? products;
+    private IReadOnlyList<ztpai.WebApp.Models.ProductResponse>? products;
+    private string? message;
 
-    private async Task FetchData()
+    protected override async Task OnInitializedAsync()
     {
-        products = await Http.GetFromJsonAsync<List<Product>>("https://localhost:7094/api/products");
+        AuthState.OnChange += HandleAuthChanged;
+        await AuthState.InitializeAsync();
+        await LoadAsync();
     }
 
-    public class Product
+    private async void HandleAuthChanged()
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string? Description { get; set; }
-        public decimal Price { get; set; }
+        await InvokeAsync(StateHasChanged);
     }
+
+    private async Task LoadAsync()
+    {
+        products = await ProductsApi.GetProductsAsync();
+    }
+
+    private async Task Delete(int id)
+    {
+        message = null;
+        try
+        {
+            await ProductsApi.DeleteProductAsync(id);
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            message = ex.Message;
+        }
+    }
+
 }

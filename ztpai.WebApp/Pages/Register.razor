@@ -1,0 +1,47 @@
+@page "/register"
+@inject ztpai.WebApp.Services.AuthApiService AuthApi
+@inject NavigationManager Navigation
+
+<PageTitle>Register</PageTitle>
+
+<h1>Rejestracja</h1>
+
+<EditForm Model="request" OnValidSubmit="HandleRegister">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label class="form-label">Nazwa użytkownika</label>
+        <InputText class="form-control" @bind-Value="request.Username" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Hasło</label>
+        <InputText class="form-control" @bind-Value="request.Password" type="password" />
+    </div>
+    <button class="btn btn-primary" type="submit">Zarejestruj</button>
+
+    @if (!string.IsNullOrWhiteSpace(message))
+    {
+        <div class="mt-3">@message</div>
+    }
+</EditForm>
+
+@code {
+    private ztpai.WebApp.Models.LoginRequest request = new();
+    private string? message;
+
+    private async Task HandleRegister()
+    {
+        message = null;
+        try
+        {
+            await AuthApi.RegisterAsync(request);
+            message = "Rejestracja zakończona. Możesz się zalogować.";
+            Navigation.NavigateTo("/login");
+        }
+        catch (Exception ex)
+        {
+            message = ex.Message;
+        }
+    }
+}

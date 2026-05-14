@@ -1,0 +1,117 @@
+@page "/users"
+@inject ztpai.WebApp.Services.AuthApiService AuthApi
+@inject ztpai.WebApp.Services.AuthState AuthState
+
+<PageTitle>Użytkownicy</PageTitle>
+
+<h1>Użytkownicy</h1>
+
+@if (!AuthState.IsAuthenticated)
+{
+    <p>Zaloguj się, aby zarządzać kontem.</p>
+}
+else
+{
+    <h2 class="mt-3">Zmiana hasła</h2>
+    <EditForm Model="passwordRequest" OnValidSubmit="ChangePassword">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <div class="mb-3">
+            <label class="form-label">Nazwa użytkownika</label>
+            <InputText class="form-control" @bind-Value="passwordRequest.Username" disabled />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Aktualne hasło</label>
+            <InputText class="form-control" @bind-Value="passwordRequest.CurrentPassword" type="password" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Nowe hasło</label>
+            <InputText class="form-control" @bind-Value="passwordRequest.NewPassword" type="password" />
+        </div>
+        <button class="btn btn-primary" type="submit">Zmień hasło</button>
+    </EditForm>
+
+    @if (!string.IsNullOrWhiteSpace(passwordMessage))
+    {
+        <div class="mt-2">@passwordMessage</div>
+    }
+
+    @if (AuthState.IsAdmin)
+    {
+        <h2 class="mt-4">Zmiana roli</h2>
+        <EditForm Model="roleRequest" OnValidSubmit="ChangeRole">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <div class="mb-3">
+                <label class="form-label">Nazwa użytkownika</label>
+                <InputText class="form-control" @bind-Value="roleRequest.Username" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Rola</label>
+                <InputText class="form-control" @bind-Value="roleRequest.Role" />
+            </div>
+            <button class="btn btn-primary" type="submit">Zmień rolę</button>
+        </EditForm>
+
+        @if (!string.IsNullOrWhiteSpace(roleMessage))
+        {
+            <div class="mt-2">@roleMessage</div>
+        }
+    }
+}
+
+@code {
+    private ztpai.WebApp.Models.UpdatePasswordRequest passwordRequest = new();
+    private ztpai.WebApp.Models.UpdateRoleRequest roleRequest = new();
+    private string? passwordMessage;
+    private string? roleMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        AuthState.OnChange += HandleAuthChanged;
+        await AuthState.InitializeAsync();
+        UpdateUsername();
+    }
+
+    private void HandleAuthChanged()
+    {
+        UpdateUsername();
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void UpdateUsername()
+    {
+        if (!string.IsNullOrWhiteSpace(AuthState.Username))
+        {
+            passwordRequest.Username = AuthState.Username;
+        }
+    }
+
+    private async Task ChangePassword()
+    {
+        passwordMessage = null;
+        try
+        {
+            await AuthApi.UpdatePasswordAsync(passwordRequest);
+            passwordMessage = "Hasło zostało zmienione.";
+        }
+        catch (Exception ex)
+        {
+            passwordMessage = ex.Message;
+        }
+    }
+
+    private async Task ChangeRole()
+    {
+        roleMessage = null;
+        try
+        {
+            await AuthApi.UpdateRoleAsync(roleRequest);
+            roleMessage = "Rola została zmieniona.";
+        }
+        catch (Exception ex)
+        {
+            roleMessage = ex.Message;
+        }
+    }
+}
