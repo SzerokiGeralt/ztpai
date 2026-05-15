@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Minio;
 using Scalar.AspNetCore;
@@ -74,6 +75,26 @@ namespace ztpai
                 .WithSSL(false)); // When local we dont use SSL
 
             var app = builder.Build();
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<MyDbContext>();
+                dbContext.Database.Migrate();
+
+                if (!dbContext.Users.Any(u => u.Role == "Admin"))
+                {
+                    var adminUser = new Models.User
+                    {
+                        Id = Guid.NewGuid(),
+                        Username = "admin",
+                        Role = "Admin"
+                    };
+
+                    adminUser.PasswordHash = new PasswordHasher<Models.User>().HashPassword(adminUser, "admin");
+                    dbContext.Users.Add(adminUser);
+                    dbContext.SaveChanges();
+                }
+            }
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
