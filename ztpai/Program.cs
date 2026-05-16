@@ -103,6 +103,8 @@ namespace ztpai
                 app.MapScalarApiReference();
             }
 
+            app.UseMiddleware<RequestLoggingMiddleware>();
+
             app.UseCors(policy =>
             policy.WithOrigins("https://localhost:7222")
             .AllowAnyMethod()
