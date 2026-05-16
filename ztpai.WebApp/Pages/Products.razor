@@ -20,6 +20,7 @@ else
                 <th>Opis</th>
                 <th>Cena</th>
                 <th>Na stanie</th>
+                <th>Obrazek</th>
                 @if (AuthState.IsAdmin)
                 {
                     <th>Akcje</th>
@@ -35,6 +36,12 @@ else
                     <td>@product.Description</td>
                     <td>@product.Price</td>
                     <td>@product.InStock</td>
+                    <td>
+                        @if (!string.IsNullOrWhiteSpace(product.ImageUrl))
+                        {
+                            <button class="btn btn-sm btn-outline-secondary" @onclick="() => ToggleImage(product.Id)">Pokaż obrazek</button>
+                        }
+                    </td>
                     @if (AuthState.IsAdmin)
                     {
                         <td>
@@ -43,6 +50,14 @@ else
                         </td>
                     }
                 </tr>
+                @if (showImageForProductId == product.Id && !string.IsNullOrWhiteSpace(product.ImageUrl))
+                {
+                    <tr>
+                        <td colspan="@GetColumnSpan()">
+                            <img class="img-fluid" src="@($"{MinioBaseUrl}{product.ImageUrl}")" alt="Obrazek produktu" />
+                        </td>
+                    </tr>
+                }
             }
         </tbody>
     </table>
@@ -63,6 +78,8 @@ else
 @code {
     private IReadOnlyList<ztpai.WebApp.Models.ProductResponse>? products;
     private string? message;
+    private int? showImageForProductId;
+    private const string MinioBaseUrl = "http://localhost:9000/productphotos/";
 
     protected override async Task OnInitializedAsync()
     {
@@ -93,6 +110,16 @@ else
         {
             message = ex.Message;
         }
+    }
+
+    private void ToggleImage(int productId)
+    {
+        showImageForProductId = showImageForProductId == productId ? null : productId;
+    }
+
+    private int GetColumnSpan()
+    {
+        return AuthState.IsAdmin ? 7 : 6;
     }
 
 }

@@ -38,5 +38,10 @@ namespace ztpai.Repository
         {
             await context.SaveChangesAsync();
         }
+
+        public async Task<IEnumerable<User>?> GetUsersAsync()
+        {
+            return await context.Users.ToListAsync();
+        }
     }
 }

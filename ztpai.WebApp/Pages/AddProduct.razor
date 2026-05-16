@@ -33,8 +33,8 @@ else
             <InputNumber class="form-control" @bind-Value="request.InStock" />
         </div>
         <div class="mb-3">
-            <label class="form-label">URL obrazka</label>
-            <InputText class="form-control" @bind-Value="request.ImageUrl" />
+            <label class="form-label">Obrazek</label>
+            <InputFile class="form-control" OnChange="HandleFileSelected" accept="image/*" />
         </div>
         <button class="btn btn-primary" type="submit">Zapisz</button>
     </EditForm>
@@ -48,6 +48,7 @@ else
 @code {
     private ztpai.WebApp.Models.ProductRequest request = new();
     private string? message;
+    private IBrowserFile? selectedFile;
 
     protected override async Task OnInitializedAsync()
     {
@@ -60,6 +61,11 @@ else
         message = null;
         try
         {
+            if (selectedFile is not null)
+            {
+                request.ImageUrl = await ProductsApi.UploadImageAsync(selectedFile);
+            }
+
             await ProductsApi.CreateProductAsync(request);
             Navigation.NavigateTo("/products");
         }
@@ -67,6 +73,11 @@ else
         {
             message = ex.Message;
         }
+    }
+
+    private void HandleFileSelected(InputFileChangeEventArgs args)
+    {
+        selectedFile = args.File;
     }
 
     private void HandleAuthChanged()

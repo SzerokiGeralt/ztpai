@@ -151,5 +151,10 @@ namespace ztpai.Services
             existingUser.Role = request.Role;
             await usersRepository.SaveChangesAsync();
         }
+
+        public async Task<IEnumerable<User>?> ListAllUsersAsync()
+        {
+            return await usersRepository.GetUsersAsync();
+        }
     }
 }

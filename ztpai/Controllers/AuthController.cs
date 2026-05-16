@@ -46,6 +46,14 @@ namespace ztpai.Controllers
             
         }
 
+        [Authorize(Roles = "Admin")]
+        [HttpGet("users")]
+        public IActionResult ListAllUsers()
+        {
+            return Ok(authService.ListAllUsersAsync());
+        }
+
+
         [Authorize]
         [HttpGet("secret")]
         public IActionResult AuthenticatedOnlyEndpoint()

@@ -11,5 +11,6 @@ namespace ztpai.Services
         Task<TokenResponseDTO?> RefreshTokensAsync(RefreshTokenRequestDTO request);
         Task UpdatePasswordAsync(UpdateUserPasswordDTO request, ClaimsPrincipal user);
         Task UpdateRoleAsync(UpdateUserRoleDTO request);
+        Task<IEnumerable<User>?> ListAllUsersAsync();
     }
 }

@@ -10,5 +10,6 @@ namespace ztpai.Repository
         Task<User?> GetUserByIdAsync(Guid userId);
         Task RefreshTokenAsync(User user, string newRefreshToken, int days);
         Task SaveChangesAsync();
+        Task<IEnumerable<User>?> GetUsersAsync();
     }
 }

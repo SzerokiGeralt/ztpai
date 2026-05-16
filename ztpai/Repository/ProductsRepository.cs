@@ -47,7 +47,9 @@ namespace ztpai.Repository
             await _context.Products.Where(p => p.Id == request.Id).ExecuteUpdateAsync(u => u
                 .SetProperty(p => p.Price, request.Price)
                 .SetProperty(p => p.Name, request.Name)
-                .SetProperty(p => p.Description, request.Description));
+                .SetProperty(p => p.Description, request.Description)
+                .SetProperty(p => p.ImageUrl, request.ImageUrl)
+                .SetProperty(p => p.InStock, request.InStock));
         }
     }
 }

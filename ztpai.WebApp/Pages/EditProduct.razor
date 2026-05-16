@@ -37,8 +37,12 @@ else
             <InputNumber class="form-control" @bind-Value="request.InStock" />
         </div>
         <div class="mb-3">
-            <label class="form-label">URL obrazka</label>
-            <InputText class="form-control" @bind-Value="request.ImageUrl" />
+            <label class="form-label">Obrazek</label>
+            <InputFile class="form-control" OnChange="HandleFileSelected" accept="image/*" />
+            @if (!string.IsNullOrWhiteSpace(request.ImageUrl))
+            {
+                <div class="form-text">Aktualny plik: @request.ImageUrl</div>
+            }
         </div>
         <button class="btn btn-primary" type="submit">Zapisz</button>
     </EditForm>
@@ -53,6 +57,8 @@ else
     [Parameter] public int Id { get; set; }
     private ztpai.WebApp.Models.ProductRequest? request;
     private string? message;
+    private IBrowserFile? selectedFile;
+    private string? originalImageUrl;
 
     protected override async Task OnInitializedAsync()
     {
@@ -76,6 +82,7 @@ else
                 InStock = product.InStock,
                 ImageUrl = product.ImageUrl
             };
+            originalImageUrl = product.ImageUrl;
         }
     }
 
@@ -89,6 +96,18 @@ else
                 return;
             }
 
+            if (selectedFile is not null)
+            {
+                var uploadedFileName = await ProductsApi.UploadImageAsync(selectedFile);
+                request.ImageUrl = uploadedFileName;
+
+                if (!string.IsNullOrWhiteSpace(originalImageUrl) &&
+                    !string.Equals(originalImageUrl, uploadedFileName, StringComparison.OrdinalIgnoreCase))
+                {
+                    await ProductsApi.DeleteImageAsync(originalImageUrl);
+                }
+            }
+
             await ProductsApi.UpdateProductAsync(Id, request);
             Navigation.NavigateTo("/products");
         }
@@ -96,6 +115,11 @@ else
         {
             message = ex.Message;
         }
+    }
+
+    private void HandleFileSelected(InputFileChangeEventArgs args)
+    {
+        selectedFile = args.File;
     }
 
     private void HandleAuthChanged()
