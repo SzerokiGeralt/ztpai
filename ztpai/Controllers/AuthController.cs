@@ -48,9 +48,10 @@ namespace ztpai.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpGet("users")]
-        public IActionResult ListAllUsers()
+        public async Task<IActionResult> ListAllUsers()
         {
-            return Ok(authService.ListAllUsersAsync());
+            var users = await authService.ListAllUsersAsync();
+            return Ok(users);
         }
 
 

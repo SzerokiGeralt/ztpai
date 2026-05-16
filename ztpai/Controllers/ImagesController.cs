@@ -23,5 +23,12 @@ namespace ztpai.Controllers
             await minioService.DeleteProductImageAsync(fileName);
             return NoContent();
         }
+
+        [HttpGet("{fileName}")]
+        public async Task<IActionResult> Get(string fileName)
+        {
+            var (stream, contentType) = await minioService.GetProductImageAsync(fileName);
+            return File(stream, contentType);
+        }
     }
 }

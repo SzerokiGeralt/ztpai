@@ -6,5 +6,6 @@ namespace ztpai.Services
     {
         Task<string> UploadProductImageAsync(IFormFile file);
         Task DeleteProductImageAsync(string fileName);
+        Task<(Stream Stream, string ContentType)> GetProductImageAsync(string fileName);
     }
 }

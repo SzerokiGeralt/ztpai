@@ -152,9 +152,15 @@ namespace ztpai.Services
             await usersRepository.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<User>?> ListAllUsersAsync()
+        public async Task<IEnumerable<UserListItemDTO>?> ListAllUsersAsync()
         {
-            return await usersRepository.GetUsersAsync();
+            var users = await usersRepository.GetUsersAsync();
+            return users?.Select(user => new UserListItemDTO
+            {
+                Id = user.Id,
+                Username = user.Username,
+                Role = user.Role
+            });
         }
     }
 }

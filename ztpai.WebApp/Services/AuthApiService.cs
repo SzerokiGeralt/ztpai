@@ -29,5 +29,19 @@ namespace ztpai.WebApp.Services
             var response = await httpClient.PutAsJsonAsync("api/auth/role", request);
             response.EnsureSuccessStatusCode();
         }
+
+        public async Task<IReadOnlyList<UserListItem>> GetUsersAsync()
+        {
+            var response = await httpClient.GetAsync("api/auth/users");
+            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized ||
+                response.StatusCode == System.Net.HttpStatusCode.Forbidden)
+            {
+                return Array.Empty<UserListItem>();
+            }
+
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<IReadOnlyList<UserListItem>>()
+                ?? Array.Empty<UserListItem>();
+        }
     }
 }

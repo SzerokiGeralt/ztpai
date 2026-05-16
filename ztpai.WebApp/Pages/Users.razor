@@ -38,20 +38,59 @@ else
 
     @if (AuthState.IsAdmin)
     {
-        <h2 class="mt-4">Zmiana roli</h2>
-        <EditForm Model="roleRequest" OnValidSubmit="ChangeRole">
-            <DataAnnotationsValidator />
-            <ValidationSummary />
-            <div class="mb-3">
-                <label class="form-label">Nazwa użytkownika</label>
-                <InputText class="form-control" @bind-Value="roleRequest.Username" />
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Rola</label>
-                <InputText class="form-control" @bind-Value="roleRequest.Role" />
-            </div>
-            <button class="btn btn-primary" type="submit">Zmień rolę</button>
-        </EditForm>
+        <h2 class="mt-4">Użytkownicy</h2>
+
+        @if (users is null)
+        {
+            <p><em>Ładowanie...</em></p>
+        }
+        else if (users.Count == 0)
+        {
+            <p>Brak dostępu do listy użytkowników lub lista jest pusta.</p>
+        }
+        else
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Nazwa użytkownika</th>
+                        <th>Rola</th>
+                        <th>Akcje</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in users)
+                    {
+                        <tr>
+                            <td>@user.Id</td>
+                            <td>@user.Username</td>
+                            <td>
+                                @if (editingUserId == user.Id)
+                                {
+                                    <InputText class="form-control" @bind-Value="editingRole" />
+                                }
+                                else
+                                {
+                                    @user.Role
+                                }
+                            </td>
+                            <td>
+                                @if (editingUserId == user.Id)
+                                {
+                                    <button class="btn btn-sm btn-outline-primary me-2" @onclick="SaveRole">Zapisz</button>
+                                    <button class="btn btn-sm btn-outline-secondary" @onclick="CancelEdit">Anuluj</button>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-sm btn-outline-primary" @onclick="() => StartEdit(user)">Edytuj</button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
 
         @if (!string.IsNullOrWhiteSpace(roleMessage))
         {
@@ -63,6 +102,9 @@ else
 @code {
     private ztpai.WebApp.Models.UpdatePasswordRequest passwordRequest = new();
     private ztpai.WebApp.Models.UpdateRoleRequest roleRequest = new();
+    private IReadOnlyList<ztpai.WebApp.Models.UserListItem>? users;
+    private Guid? editingUserId;
+    private string? editingRole;
     private string? passwordMessage;
     private string? roleMessage;
 
@@ -71,6 +113,10 @@ else
         AuthState.OnChange += HandleAuthChanged;
         await AuthState.InitializeAsync();
         UpdateUsername();
+        if (AuthState.IsAdmin)
+        {
+            await LoadUsersAsync();
+        }
     }
 
     private void HandleAuthChanged()
@@ -108,6 +154,53 @@ else
         {
             await AuthApi.UpdateRoleAsync(roleRequest);
             roleMessage = "Rola została zmieniona.";
+        }
+        catch (Exception ex)
+        {
+            roleMessage = ex.Message;
+        }
+    }
+
+    private async Task LoadUsersAsync()
+    {
+        users = await AuthApi.GetUsersAsync();
+    }
+
+    private void StartEdit(ztpai.WebApp.Models.UserListItem user)
+    {
+        editingUserId = user.Id;
+        editingRole = user.Role;
+    }
+
+    private void CancelEdit()
+    {
+        editingUserId = null;
+        editingRole = null;
+    }
+
+    private async Task SaveRole()
+    {
+        if (editingUserId is null || string.IsNullOrWhiteSpace(editingRole))
+        {
+            return;
+        }
+
+        var user = users?.FirstOrDefault(u => u.Id == editingUserId);
+        if (user is null)
+        {
+            return;
+        }
+
+        roleMessage = null;
+        try
+        {
+            roleRequest.Username = user.Username;
+            roleRequest.Role = editingRole;
+            await AuthApi.UpdateRoleAsync(roleRequest);
+            roleMessage = "Rola została zmieniona.";
+            editingUserId = null;
+            editingRole = null;
+            await LoadUsersAsync();
         }
         catch (Exception ex)
         {

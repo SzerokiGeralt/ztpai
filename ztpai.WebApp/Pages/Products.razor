@@ -54,7 +54,7 @@ else
                 {
                     <tr>
                         <td colspan="@GetColumnSpan()">
-                            <img class="img-fluid" src="@($"{MinioBaseUrl}{product.ImageUrl}")" alt="Obrazek produktu" />
+                            <img class="img-fluid" src="@($"{ApiBaseUrl}api/images/{product.ImageUrl}")" alt="Obrazek produktu" />
                         </td>
                     </tr>
                 }
@@ -79,7 +79,7 @@ else
     private IReadOnlyList<ztpai.WebApp.Models.ProductResponse>? products;
     private string? message;
     private int? showImageForProductId;
-    private const string MinioBaseUrl = "http://localhost:9000/productphotos/";
+    private const string ApiBaseUrl = "https://localhost:7094/";
 
     protected override async Task OnInitializedAsync()
     {
