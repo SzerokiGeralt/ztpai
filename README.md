@@ -26,7 +26,7 @@
 - **Frontend**: frontend jest w Blazor WebAssembly (`ztpai.WebApp`) i udostępnia podstawowe akcje za pomocą interfejsu graficznego
 
 <h3>Film demontracyjny:</h3>
-https://youtu.be/BVGeM2jB28U
+https://youtu.be/sFq2SyThDf4
 
 <h3>Wymagania:</h3>
 
