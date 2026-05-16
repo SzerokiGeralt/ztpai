@@ -1,4 +1,5 @@
-Projekt **Web Api + Web App** został zrealizowany w frameworku **ASP .NET Core** z wykorzystaniem:
+<h3>Projekt został zrealizowany w frameworku .NET z wykorzystaniem:</h3>
+
 - Enitity (ORM dla C# .NET)
 - PostgreSQL (Baza danych)
 - Docker (Konteneryzacja)
@@ -10,7 +11,8 @@ Projekt **Web Api + Web App** został zrealizowany w frameworku **ASP .NET Core*
 - Blazor Web Assembly (Aplikacja webowa)
 - JWT (Autoryzacja użytkowników)
 
-Szczegółowe wymagania:
+<h3>Szczegółowe wymagania:</h3>
+
 - **Działający Spring Boot**: projekt napisany w .NET (ASP.NET Core)
 - **Połączenie z bazą danych**: konfiguracja EF Core z PostgreSQL
 - **CRUD dla encji**: pełny CRUD dla `Product` oraz dla `User`
@@ -23,23 +25,26 @@ Szczegółowe wymagania:
 - **Czysty kod**: zastosowany podział na warstwy, wykorzystywanie Dependency Injection oraz Mapperów i DTO
 - **Frontend**: frontend jest w Blazor WebAssembly (`ztpai.WebApp`) i udostępnia podstawowe akcje za pomocą interfejsu graficznego
 
-Film demontracyjny:
-[Link]
+<h3>Film demontracyjny:</h3>
+https://youtu.be/BVGeM2jB28U
 
-Wymagania:
+<h3>Wymagania:</h3>
+
 - .NET SDK 10
 - PostgreSQL (connection string set in ztpai/appsettings*.json or user secrets)
 - RabbitMQ (host set to localhost in ztpai/appsettings.json)
 - MinIO (address/credentials set in API config)
 
-Uruchomienie:
+<h3>Uruchomienie:</h3>
+
 - `docker compose up` w folderze głównym
 - `dotnet restore`
 - Worker: `dotnet run --project NotificationService`
 - API: `dotnet run --project ztpai --launch-profile https`
 - WebApp: `dotnet run --project ztpai.WebApp --launch-profile https`
 
-Przydatne porty i credentials:
+<h3>Przydatne porty i credentials:</h3>
+
 - Scalar: https://localhost:7094/scalar/v1
 - API: https://localhost:7094, http://localhost:5097
 - WebApp: https://localhost:7222, http://localhost:5227
@@ -53,7 +58,8 @@ Przydatne porty i credentials:
 - PostgreSQL password: `admin`
 - PostgreSQL port: `5432`
 
-Roadmap & TODO:
+<h3>Roadmap:</h3>
+
 - Atraktycja graficznie strona główna z produktami
 - Wyświetlanie obrazków produktów
 - Dodanie koszyka w Web App za pomocą Redis
